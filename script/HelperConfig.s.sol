@@ -4,6 +4,7 @@ pragma solidity >=0.8.13 <0.9.0;
 import {Script} from "forge-std/Script.sol";
 import {Raffle} from "../src/Raffle.sol";
 import {VRFCoordinatorV2_5Mock} from "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
+import {LinkToken} from "../test/mocks/LinkToken.sol";
 
 abstract contract CodeConstants {
     uint256 public constant ETH_SEPOLIA_CHAIN_ID = 11155111;
@@ -24,6 +25,7 @@ contract HelperConfig is Script, CodeConstants {
         bytes32 gasLane;
         uint256 subscriptionId;
         uint32 callbackGasLimit;
+        address link;
     }
 
     NetworkConfig public localNetworkConfig;
@@ -54,7 +56,8 @@ contract HelperConfig is Script, CodeConstants {
             vrfCoordinator: 0x5CE8D5A2BC84beb22a398CCA51996F7930313D61,
             gasLane: 0x1770bdc7eec7771f7ba4ffd640f34260d7f095b79c92d34a5b2551d6f6cfd2be,
             callbackGasLimit: 500000,
-            subscriptionId: 0
+            subscriptionId: 0,
+            link: 0xb1D4538B4571d411F07960EF2838Ce337FE1E80E
         });
     }
 
@@ -66,12 +69,10 @@ contract HelperConfig is Script, CodeConstants {
         // Deploy mocks.
         vm.startBroadcast();
 
-        VRFCoordinatorV2_5Mock vrfCoordinatorMock =
-            new VRFCoordinatorV2_5Mock(
-                uint96(MOCK_BASE_FEE), 
-                uint96(MOCK_GAS_PRICE_LINK), 
-                int256(MOCK_WEI_PER_UINT_LINK)
-            );
+        VRFCoordinatorV2_5Mock vrfCoordinatorMock = new VRFCoordinatorV2_5Mock(
+            uint96(MOCK_BASE_FEE), uint96(MOCK_GAS_PRICE_LINK), int256(MOCK_WEI_PER_UINT_LINK)
+        );
+        LinkToken linkToken = new LinkToken();
 
         vm.stopBroadcast();
 
@@ -81,7 +82,8 @@ contract HelperConfig is Script, CodeConstants {
             vrfCoordinator: address(vrfCoordinatorMock),
             gasLane: 0x1770bdc7eec7771f7ba4ffd640f34260d7f095b79c92d34a5b2551d6f6cfd2be,
             callbackGasLimit: 500000,
-            subscriptionId: 0
+            subscriptionId: 0,
+            link: address(linkToken)
         });
 
         return localNetworkConfig;
